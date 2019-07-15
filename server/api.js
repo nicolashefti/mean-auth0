@@ -282,7 +282,6 @@ module.exports = function (app, config) {
     var password = config.FS_API_PASSWORD;
     var url = 'https://' + username + ':' + password + '@api.fastspring.com/orders';
 
-    console.log(url);
     request.get(url, {
       headers: {
         'User-Agent': 'APPIZY Backend'
@@ -299,5 +298,4 @@ module.exports = function (app, config) {
       res.send(JSON.parse(body));
     });
   });
-
 };
