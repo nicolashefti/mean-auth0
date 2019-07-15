@@ -8,7 +8,7 @@ const jwt = require('express-jwt');
 const jwks = require('jwks-rsa');
 const Event = require('./models/Event');
 const Rsvp = require('./models/Rsvp');
-
+const request = require('request');
 /*
  |--------------------------------------
  | Authentication Middleware
@@ -274,6 +274,29 @@ module.exports = function (app, config) {
         }
         res.send(rsvp);
       });
+    });
+  });
+
+  app.get('/api/orders', (req, res)=> {
+    var username = config.FS_API_USERNAME;
+    var password = config.FS_API_PASSWORD;
+    var url = 'https://' + username + ':' + password + '@api.fastspring.com/orders';
+
+    console.log(url);
+    request.get(url, {
+      headers: {
+        'User-Agent': 'APPIZY Backend'
+      }
+    },
+    function (error, response, body) {
+      if (error) {
+        return console.error('upload failed:', error);
+      }
+
+      console.log('error:', error); // Print the error if one occurred
+      console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+
+      res.send(JSON.parse(body));
     });
   });
 
