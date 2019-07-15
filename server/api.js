@@ -15,7 +15,7 @@ const Rsvp = require('./models/Rsvp');
  |--------------------------------------
  */
 
-module.exports = function(app, config) {
+module.exports = function (app, config) {
   // Authentication middleware
   const jwtCheck = jwt({
     secret: jwks.expressJwtSecret({
@@ -32,19 +32,19 @@ module.exports = function(app, config) {
   // Check for an authenticated admin user
   const adminCheck = (req, res, next) => {
     const roles = req.user[config.NAMESPACE] || [];
+    console.log(roles, req.user, config.NAMESPACE);
     if (roles.indexOf('admin') > -1) {
       next();
     } else {
       res.status(401).send({message: 'Not authorized for admin access'});
     }
-  }
+  };
 
-/*
- |--------------------------------------
- | API Routes
- |--------------------------------------
- */
-
+  /*
+   |--------------------------------------
+   | API Routes
+   |--------------------------------------
+   */
   const _eventListProjection = 'title startDatetime endDatetime viewPublic';
 
   // GET API root
@@ -54,7 +54,8 @@ module.exports = function(app, config) {
 
   // GET list of public events starting in the future
   app.get('/api/events', (req, res) => {
-    Event.find({viewPublic: true, startDatetime: { $gte: new Date() }},
+    console.log('Hello');
+    Event.find({viewPublic: true, startDatetime: {$gte: new Date()}},
       _eventListProjection, (err, events) => {
         let eventsArr = [];
         if (err) {
@@ -128,18 +129,18 @@ module.exports = function(app, config) {
       }
       if (rsvps) {
         Event.find(
-          {_id: {$in: _eventIdsArr}, startDatetime: { $gte: new Date() }},
+          {_id: {$in: _eventIdsArr}, startDatetime: {$gte: new Date()}},
           _rsvpEventsProjection, (err, events) => {
-          if (err) {
-            return res.status(500).send({message: err.message});
-          }
-          if (events) {
-            events.forEach(event => {
-              eventsArr.push(event);
-            });
-          }
-          res.send(eventsArr);
-        });
+            if (err) {
+              return res.status(500).send({message: err.message});
+            }
+            if (events) {
+              events.forEach(event => {
+                eventsArr.push(event);
+              });
+            }
+            res.send(eventsArr);
+          });
       }
     });
   });
@@ -149,7 +150,8 @@ module.exports = function(app, config) {
     Event.findOne({
       title: req.body.title,
       location: req.body.location,
-      startDatetime: req.body.startDatetime}, (err, existingEvent) => {
+      startDatetime: req.body.startDatetime
+    }, (err, existingEvent) => {
       if (err) {
         return res.status(500).send({message: err.message});
       }

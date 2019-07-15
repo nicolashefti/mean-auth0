@@ -94,6 +94,7 @@ export class AuthService {
   private _checkAdmin(profile) {
     // Check if the user has admin role
     const roles = profile[AUTH_CONFIG.NAMESPACE] || [];
+    console.log(roles, profile, AUTH_CONFIG.NAMESPACE);
     return roles.indexOf('admin') > -1;
   }
 
