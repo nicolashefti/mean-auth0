@@ -11,6 +11,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { CallbackComponent } from './pages/callback/callback.component';
 import { MyRsvpsComponent } from './pages/my-rsvps/my-rsvps.component';
 import { ShopComponent } from './pages/shop/shop.component';
+import { OrderConfirmationComponent } from './pages/order-confirmation/order-confirmation.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { ShopComponent } from './pages/shop/shop.component';
     HomeComponent,
     CallbackComponent,
     MyRsvpsComponent,
-    ShopComponent
+    ShopComponent,
+    OrderConfirmationComponent
   ],
   imports: [
     BrowserModule,

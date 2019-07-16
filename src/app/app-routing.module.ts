@@ -6,6 +6,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { CallbackComponent } from './pages/callback/callback.component';
 import { MyRsvpsComponent } from './pages/my-rsvps/my-rsvps.component';
 import {ShopComponent} from './pages/shop/shop.component';
+import {OrderConfirmationComponent} from './pages/order-confirmation/order-confirmation.component';
 
 const routes: Routes = [
   {
@@ -32,10 +33,11 @@ const routes: Routes = [
   },
   {
     path: 'shop',
-    component: ShopComponent,
-    canActivate: [
-      AuthGuard
-    ]
+    component: ShopComponent
+  },
+  {
+    path: 'order-confirmation',
+    component: OrderConfirmationComponent
   },
   {
     path: 'admin',

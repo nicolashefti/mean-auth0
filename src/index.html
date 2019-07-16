@@ -15,5 +15,23 @@
 </head>
 <body>
   <app-root></app-root>
+  <script>
+    function onFSPopupClosed(orderReference) {
+      if (orderReference)
+      {
+        console.log(orderReference.reference);
+        fastspring.builder.reset();
+      } else {
+        console.log("no order ID");
+      }
+    }
+  </script>
+  <script
+    id="fsc-api"
+    src="https://d1f8f9xcsvx3ha.cloudfront.net/sbl/0.8.0/fastspring-builder.min.js"
+    type="text/javascript"
+    data-popup-closed="onFSPopupClosed"
+    data-storefront="appizy.test.onfastspring.com/popup-single-page">
+  </script>
 </body>
 </html>

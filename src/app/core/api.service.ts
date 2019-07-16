@@ -126,6 +126,18 @@ export class ApiService {
       );
   }
 
+  validateOrder(orderId: string): any {
+    return this.http
+      .post(`${ENV.BASE_API}order-validate`, {
+        orderId: orderId
+      }, {
+        headers: new HttpHeaders().set('Authorization', this._authHeader)
+      })
+      .pipe(
+        catchError((error) => this._handleError(error))
+      );
+  }
+
   private _handleError(err: HttpErrorResponse | any): Observable<any> {
     const errorMsg = err.message || 'Error: Unable to complete request.';
     if (err.message && err.message.indexOf('No JWT present') > -1) {

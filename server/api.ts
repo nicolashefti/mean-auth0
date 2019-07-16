@@ -1,5 +1,6 @@
 import Event from './models/Event';
 import Rsvp from './models/Rsvp';
+import Order from './models/Order';
 import * as jwt from 'express-jwt';
 import * as jwks from 'jwks-rsa';
 // const Event = require('./models/Event');
@@ -81,11 +82,7 @@ if (process.env.NODE_ENV !== 'dev') {
     }
   };
 
-  /*
-   |--------------------------------------
-   | API Routes
-   |--------------------------------------
-   */
+
 const _eventListProjection = 'title startDatetime endDatetime viewPublic';
 
 // GET API root
@@ -339,4 +336,28 @@ app.get('/api/orders', (req, res)=> {
   });
 });
 
+app.post('/api/order-validate', (req, res) => {
+  Order.findOne({
+    fsId: req.body.orderId
+  }, (err, existingEvent) => {
+    if (err) {
+      return res.status(500).send({message: err.message});
+    }
+    if (existingEvent) {
+      return res.status(409).send({message: 'You have already created an event with this title, location, and start date/time.'});
+    }
+    const event = new Order({
+      fsId: req.body.orderId,
+      // userId: req.user.sub
+      userId: 'userId'
+    });
+    event.save((err) => {
+      if (err) {
+        return res.status(500).send({message: err.message});
+      }
+      res.send(event);
+    });
+  });
+});
 app.listen(port, () => console.log(`Server running on localhost:${port}`));
+
