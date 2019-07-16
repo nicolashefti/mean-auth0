@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "dev": "concurrently \"ng serve\" \"NODE_ENV=dev node server\"",
+    "dev": "NODE_ENV=dev ./node_modules/.bin/nodemon dist/server/api",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -55,6 +55,7 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "nodemon": "^1.19.1",
     "protractor": "^5.4.0",
     "ts-node": "~3.2.0",
     "tslint": "5.10.0",

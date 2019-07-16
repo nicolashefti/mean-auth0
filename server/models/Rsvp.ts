@@ -1,10 +1,5 @@
-/*
- |--------------------------------------
- | Rsvp Model
- |--------------------------------------
- */
+import * as  mongoose from 'mongoose';
 
-const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const rsvpSchema = new Schema({
@@ -16,4 +11,4 @@ const rsvpSchema = new Schema({
   comments: String
 });
 
-module.exports = mongoose.model('Rsvp', rsvpSchema);
+export default mongoose.model('Rsvp', rsvpSchema);

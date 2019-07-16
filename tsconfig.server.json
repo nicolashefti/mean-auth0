@@ -1,8 +1,8 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "./dist/web",
-    "baseUrl": "src",
+    "outDir": "./dist/server",
+    "baseUrl": "server",
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
@@ -20,6 +20,9 @@
   "angularCompilerOptions": {
     "preserveWhitespaces": false
   },
+  "include": [
+    "server/**/*"
+  ],
   "exclude": [
     "test.ts",
     "**/*.spec.ts"

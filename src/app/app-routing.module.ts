@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-// Route guards
 import { AuthGuard } from './auth/auth.guard';
 import { AdminGuard } from './auth/admin.guard';
-// Page components
 import { HomeComponent } from './pages/home/home.component';
 import { CallbackComponent } from './pages/callback/callback.component';
 import { MyRsvpsComponent } from './pages/my-rsvps/my-rsvps.component';
+import {ShopComponent} from './pages/shop/shop.component';
 
 const routes: Routes = [
   {
@@ -27,6 +26,13 @@ const routes: Routes = [
   {
     path: 'my-rsvps',
     component: MyRsvpsComponent,
+    canActivate: [
+      AuthGuard
+    ]
+  },
+  {
+    path: 'shop',
+    component: ShopComponent,
     canActivate: [
       AuthGuard
     ]
