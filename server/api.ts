@@ -3,18 +3,12 @@ import Rsvp from './models/Rsvp';
 import Order from './models/Order';
 import * as jwt from 'express-jwt';
 import * as jwks from 'jwks-rsa';
-// const Event = require('./models/Event');
-// const Rsvp = require('./models/Rsvp');
 import * as  request from 'request';
-/*
- |--------------------------------------
- | Authentication Middleware
- |--------------------------------------
- */
-
-
-// Modules
 import * as express from 'express';
+import * as Realm from 'realm';
+import {EventSchema} from './models/event-schema';
+import {RsvpSchema} from './models/rsvp-schema';
+import {OrderSchema} from './models/order-schema';
 
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -24,21 +18,13 @@ const cors = require('cors');
 // Config
 const config = require('./config');
 
-/*
- |--------------------------------------
- | MongoDB
- |--------------------------------------
- */
-
-mongoose.connect(config.MONGO_URI);
-const monDb = mongoose.connection;
-
-monDb.on('error', function () {
-  console.error('MongoDB Connection Error. Please make sure that', config.MONGO_URI, 'is running.');
-});
-
-monDb.once('open', function callback() {
-  console.info('Connected to MongoDB:', config.MONGO_URI);
+const realm = new Realm({
+  schema: [
+    EventSchema,
+    RsvpSchema,
+    OrderSchema
+  ],
+  path: './data/mean.realm'
 });
 
 const app = express();
@@ -58,29 +44,29 @@ if (process.env.NODE_ENV !== 'dev') {
   app.use('/', express.static(path.join(__dirname, './dist')));
 }
 
-  // Authentication middleware
-  const jwtCheck = jwt({
-    secret: jwks.expressJwtSecret({
-      cache: true,
-      rateLimit: true,
-      jwksRequestsPerMinute: 5,
-      jwksUri: `https://${config.AUTH0_DOMAIN}/.well-known/jwks.json`
-    }),
-    audience: config.AUTH0_API_AUDIENCE,
-    issuer: `https://${config.AUTH0_DOMAIN}/`,
-    algorithm: 'RS256'
-  });
+// Authentication middleware
+const jwtCheck = jwt({
+  secret: jwks.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `https://${config.AUTH0_DOMAIN}/.well-known/jwks.json`
+  }),
+  audience: config.AUTH0_API_AUDIENCE,
+  issuer: `https://${config.AUTH0_DOMAIN}/`,
+  algorithm: 'RS256'
+});
 
-  // Check for an authenticated admin user
-  const adminCheck = (req, res, next) => {
-    const roles = req.user[config.NAMESPACE] || [];
-    console.log(roles, req.user, config.NAMESPACE);
-    if (roles.indexOf('admin') > -1) {
-      next();
-    } else {
-      res.status(401).send({message: 'Not authorized for admin access'});
-    }
-  };
+// Check for an authenticated admin user
+const adminCheck = (req, res, next) => {
+  const roles = req.user[config.NAMESPACE] || [];
+  console.log(roles, req.user, config.NAMESPACE);
+  if (roles.indexOf('admin') > -1) {
+    next();
+  } else {
+    res.status(401).send({message: 'Not authorized for admin access'});
+  }
+};
 
 
 const _eventListProjection = 'title startDatetime endDatetime viewPublic';
@@ -90,28 +76,20 @@ app.get('/api/', (req, res) => {
   res.send('API works');
 });
 
-// GET list of public events starting in the future
 app.get('/api/events', (req, res) => {
-  Event.find({viewPublic: true, startDatetime: {$gte: new Date()}},
-    _eventListProjection, (err, events) => {
-      const eventsArr = [];
-      if (err) {
-        return res.status(500).send({message: err.message});
-      }
-      if (events) {
-        events.forEach(event => {
-          eventsArr.push(event);
-        });
-      }
-      res.send(eventsArr);
-    }
-  );
+  const events = realm.objects('Event');
+  const eventsArr = [];
+  events.forEach(event => {
+    eventsArr.push(event);
+  });
+
+  res.send(eventsArr);
 });
 
 // GET list of all events, public and private (admin only)
 app.get('/api/events/admin', jwtCheck, adminCheck, (req, res) => {
   Event.find({}, _eventListProjection, (err, events) => {
-    const eventsArr = [];
+      const eventsArr = [];
       if (err) {
         return res.status(500).send({message: err.message});
       }
@@ -127,15 +105,12 @@ app.get('/api/events/admin', jwtCheck, adminCheck, (req, res) => {
 
 // GET event by event ID
 app.get('/api/event/:id', jwtCheck, (req, res) => {
-  Event.findById(req.params.id, (err, event) => {
-    if (err) {
-      return res.status(500).send({message: err.message});
-    }
-    if (!event) {
-      return res.status(400).send({message: 'Event not found.'});
-    }
-    res.send(event);
-  });
+  const event = realm.objects('Event').filtered(`id='${req.params.id}'`);
+
+  if (!event) {
+    return res.status(400).send({message: 'Event not found.'});
+  }
+  res.send(event);
 });
 
 // GET RSVPs by event ID
@@ -314,26 +289,26 @@ app.put('/api/rsvp/:id', jwtCheck, (req, res) => {
   });
 });
 
-app.get('/api/orders', (req, res)=> {
+app.get('/api/orders', (req, res) => {
   const username = config.FS_API_USERNAME;
   const password = config.FS_API_PASSWORD;
   const url = 'https://' + username + ':' + password + '@api.fastspring.com/orders';
 
   request.get(url, {
-    headers: {
-      'User-Agent': 'APPIZY Backend'
-    }
-  },
-  function (error, response, body) {
-    if (error) {
-      return console.error('upload failed:', error);
-    }
+      headers: {
+        'User-Agent': 'APPIZY Backend'
+      }
+    },
+    function (error, response, body) {
+      if (error) {
+        return console.error('upload failed:', error);
+      }
 
-    console.log('error:', error); // Print the error if one occurred
-    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+      console.log('error:', error); // Print the error if one occurred
+      console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
 
-    res.send(JSON.parse(body));
-  });
+      res.send(JSON.parse(body));
+    });
 });
 
 app.post('/api/order-validate', (req, res) => {
